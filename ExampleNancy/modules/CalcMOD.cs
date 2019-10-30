@@ -5,6 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ExampleNancy.DTO;
 using Nancy;
+using Nancy.Extensions;
+using Nancy.Routing.Constraints;
+using Newtonsoft.Json;
 using WalletsApi.Views;
 
 namespace ExampleNancy.modules
@@ -19,8 +22,6 @@ namespace ExampleNancy.modules
             
             Get("/calc/{category}", parameters =>
             {
-                var a = new RutaAttribute("la ruta es bla bla");
-
                 var wallet = new WalletView()
                 {
                     Id = (Nancy.DynamicDictionaryValue)parameters.category,
@@ -31,10 +32,25 @@ namespace ExampleNancy.modules
                 return wallet; 
             });
 
-            After += ctx =>
-            {
-                ctx.Response.ContentType = "application/json";
-            };
+
+            Post("/calc", parameters =>
+                {
+
+                    var a = this.Request.Body.AsString();
+                    Console.WriteLine("Los parametros llegaron "+a);
+                    var b = JsonConvert.DeserializeObject<RequestGeneric>(a);
+
+                    var wallet = new WalletView()
+                    {
+                        Id = b.Key,
+                        BankAccountNumber = b.Object,
+                        CurrentBalance = 150000,
+                    };
+
+                    return wallet;
+                }
+
+            );
 
         }
     }
